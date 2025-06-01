@@ -1,6 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* src/index.css lub App.css */
+@import "~slick-carousel/slick/slick.css"; 
+@import "~slick-carousel/slick/slick-theme.css";
+
+/* Niestandardowy pasek przewijania */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Szerokość paska przewijania */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(30, 80, 50, 0.3); /* Tło ścieżki przewijania */
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(52, 211, 153, 0.7); /* Kolor uchwytu przewijania (zielony) */
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(52, 211, 153, 1); /* Kolor uchwytu przewijania po najechaniu */
+}
+
+/* Dostosowanie stylu kropek nawigacyjnych Slick Carousel */
+.slick-dots li button:before {
+    font-size: 10px !important;
+    color: rgba(52, 211, 153, 0.5) !important; /* Zielony kolor nieaktywnych kropek */
+    opacity: 1 !important;
+}
+
+.slick-dots li.slick-active button:before {
+    color: rgb(52, 211, 153) !important; /* Jasnozielony kolor aktywnej kropki */
+}
 
 body {
   margin: 0;

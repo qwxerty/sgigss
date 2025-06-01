@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Opinie from './pages/Opinie';
 import Regulamin from './pages/Regulamin';
 import Kontakt from './pages/Kontakt';
+import FAQ from './pages/Faq';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/opinie" element={<Opinie />} />
           <Route path="/regulamin" element={<Regulamin />} />
           <Route path="/kontakt" element={<Kontakt />} />
+          <Route path="/faq" element={<FAQ />} />
         </Routes>
       </AnimatePresence>
     </Router>

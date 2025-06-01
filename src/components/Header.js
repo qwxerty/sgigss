@@ -4,7 +4,9 @@ import { motion } from 'framer-motion';
 const Header = () => {
   return (
     <header className="relative h-[90vh] bg-gradient-to-b from-green-900 to-green-950 text-center flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1619204715997-1367fe5812f1')] bg-cover bg-center opacity-15 animate-bg-move"></div>
+      {/* Zmiany w linii poniżej: usunięto bg-cover, dodano niestandardowy rozmiar tła i pozycję */}
+      {/* WAŻNE: Dodaj styl dla `bg-custom-size` w Twoim pliku CSS (np. index.css lub global.css) */}
+      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1619204715997-1367fe5812f1?q=80&w=1920&auto=format&fit=crop')] bg-custom-size bg-no-repeat bg-center opacity-15 animate-bg-move"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-green-950/80"></div>
       <div className="relative z-10">
         <motion.h1
@@ -37,5 +39,4 @@ const Header = () => {
     </header>
   );
 };
-
 export default Header;

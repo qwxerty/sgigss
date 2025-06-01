@@ -24,7 +24,7 @@ const Navbar = () => {
           </Link>
         </motion.div>
         <div className="flex space-x-8">
-          {['Strona główna', 'Opinie', 'Regulamin', 'Kontakt'].map((item, index) => (
+          {['Strona główna', 'Opinie', 'Regulamin', 'Faq', 'Kontakt'].map((item, index) => (
             <motion.div
               key={item}
               variants={navVariants}

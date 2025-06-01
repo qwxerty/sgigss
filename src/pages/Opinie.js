@@ -1,3 +1,4 @@
+// src/pages/Opinie.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -10,27 +11,62 @@ const Opinie = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1, 
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } },
+  };
+
   useEffect(() => {
     const fetchOpinions = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const response = await axios.get('http://localhost:5000/api/reviews');
-        const fetchedOpinions = response.data.map((opinion, index) => ({
-          id: index + 1,
+        
+        const filteredOpinions = response.data.filter(
+          opinion => opinion.username && opinion.content && opinion.date && opinion.rating // Dodano sprawdzanie rating
+        );
+
+        const sortedOpinions = filteredOpinions.sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+
+        const fetchedOpinions = sortedOpinions.map((opinion, index) => ({
+          id: opinion.id || `${index}-${new Date().getTime()}`, 
           avatar: opinion.avatar,
           username: opinion.username,
           content: opinion.content,
-          date: opinion.date,
+          rating: opinion.rating, // KLUCZOWA ZMIANA: Pobieranie oceny
+          date: new Date(opinion.date).toLocaleString('pl-PL', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
         }));
+        
         setOpinions(fetchedOpinions);
         setLoading(false);
       } catch (err) {
+        console.error("Błąd podczas pobierania opinii (frontend):", err);
         setError('Nie udało się pobrać opinii. Spróbuj ponownie później.');
         setLoading(false);
       }
     };
 
     fetchOpinions();
-  }, []);
+  }, []); 
 
   return (
     <motion.div
@@ -38,7 +74,7 @@ const Opinie = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-green-950 text-white font-sans"
+      className="min-h-screen bg-green-950 text-white font-sans overflow-hidden"
     >
       <Navbar />
       <section className="py-20 px-4">
@@ -51,38 +87,65 @@ const Opinie = () => {
         >
           NASZE OPINIE
         </motion.h2>
-        {loading && <p className="text-center text-gray-400">Ładowanie opinii...</p>}
-        {error && <p className="text-center text-red-400">{error}</p>}
-        {!loading && !error && opinions.length === 0 && (
-          <p className="text-center text-gray-400">Brak opinii do wyświetlenia.</p>
+        
+        {loading && (
+          <p className="text-center text-gray-400 text-lg py-10">Ładowanie opinii...</p>
         )}
-        {!loading && !error && opinions.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {opinions.map((opinion) => (
-              <OpinionCard
-                key={opinion.id}
-                id={opinion.id}
-                avatar={opinion.avatar}
-                username={opinion.username}
-                content={opinion.content}
-                date={opinion.date}
-              />
-            ))}
-          </div>
+        {error && (
+          <p className="text-center text-red-400 text-lg py-10">
+            {error}
+            <br />
+            Sprawdź, czy serwer API jest uruchomiony i dostępny na <code className="bg-green-800/50 p-1 rounded">http://localhost:5000</code>.
+          </p>
+        )}
+        
+        {!loading && !error && (
+          <>
+            {opinions.length === 0 ? (
+              <p className="text-center text-gray-400 text-lg py-10">
+                Brak opinii do wyświetlenia. Upewnij się, że są poprawne opinie w pliku JSON i bot je wysyła.
+                <br />
+                (Opinie pojawiają się z kanału Discord <code className="bg-green-800/50 p-1 rounded">#opinie</code>)
+              </p>
+            ) : (
+              <motion.div
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 items-stretch"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                {opinions.map((opinion, index) => ( 
+                  <motion.div key={opinion.id} variants={itemVariants} className="w-full">
+                    <OpinionCard
+                      id={opinion.id}
+                      avatar={opinion.avatar}
+                      username={opinion.username}
+                      content={opinion.content}
+                      rating={opinion.rating} // KLUCZOWA ZMIANA: Przekazywanie oceny
+                      date={opinion.date}
+                      delay={index * 0.1} 
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </>
         )}
       </section>
+
       <footer className="bg-green-900 py-12 px-4">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl text-green-300 font-semibold mb-4">Minecraft Elite</h3>
             <p className="text-gray-400 text-sm">Najlepsze konta Minecraft dla elitarnych graczy.</p>
           </div>
-          {/* <div>
+          <div>
             <h3 className="text-xl text-green-300 font-semibold mb-4">Linki</h3>
             <ul className="space-y-2">
               <li><Link to="/" className="text-gray-400 hover:text-green-400 transition-colors duration-300">Strona główna</Link></li>
               <li><Link to="/opinie" className="text-gray-400 hover:text-green-400 transition-colors duration-300">Opinie</Link></li>
               <li><Link to="/regulamin" className="text-gray-400 hover:text-green-400 transition-colors duration-300">Regulamin</Link></li>
+              <li><Link to="/faq" className="text-gray-400 hover:underline">FAQ</Link></li>
               <li><Link to="/kontakt" className="text-gray-400 hover:text-green-400 transition-colors duration-300">Kontakt</Link></li>
             </ul>
           </div>
@@ -90,10 +153,10 @@ const Opinie = () => {
             <h3 className="text-xl text-green-300 font-semibold mb-4">Kontakt</h3>
             <p className="text-gray-400 text-sm">Email: <span className="text-green-400">kontakt@minecraftelite.pl</span></p>
             <p className="text-gray-400 text-sm mt-2">Discord: <a href="#" className="text-green-400 hover:underline">Dołącz do nas!</a></p>
-          </div> */}
+          </div>
         </div>
         <div className="text-center text-gray-500 text-sm mt-8">
-          © 2025 Minecraft Elite. Wszystkie prawa zastrzeżone.
+          © {new Date().getFullYear()} Minecraft Elite. Wszystkie prawa zastrzeżone.
         </div>
       </footer>
     </motion.div>
