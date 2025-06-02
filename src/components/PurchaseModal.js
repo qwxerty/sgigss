@@ -1,156 +1,155 @@
-// frontend/src/components/PurchaseModal.js
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom'; // <--- Zmieniono z powrotem na Link
-import validator from 'validator'; 
-import { loadStripe } from '@stripe/stripe-js';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { XMarkIcon } from '@heroicons/react/24/outline'; // Zmieniono na XMarkIcon
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const PurchaseModal = ({ product, isOpen, onClose }) => { // Usunięto onPurchaseSuccess
+    const [email, setEmail] = useState('');
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-const PurchaseModal = ({ isOpen, onClose, product, onPurchaseConfirm }) => {
-  const [email1, setEmail1] = useState('');
-  const [email2, setEmail2] = useState('');
-  const [promoCode, setPromoCode] = useState(''); 
-  const [acceptTerms, setAcceptTerms] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        // Resetuj stan modalu, gdy się otworzy
+        if (isOpen) {
+            setEmail('');
+            setAgreedToTerms(false);
+            setError('');
+            setIsLoading(false);
+            // Zablokuj scrollowanie ciała strony, gdy modal jest otwarty
+            document.body.style.overflow = 'hidden';
+        } else {
+            // Przywróć scrollowanie, gdy modal jest zamknięty
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset'; // Upewnij się, że scrollowanie jest przywrócone po odmontowaniu
+        };
+    }, [isOpen]);
 
-  if (!isOpen) return null;
+    if (!isOpen || !product) return null;
 
-  const handleFormSubmit = async (paymentMethod) => {
-    // 1. Walidacja danych
-    if (!validator.isEmail(email1) || !validator.isEmail(email2)) {
-      setError('Podaj prawidłowy format adresu e-mail.');
-      return;
-    }
-    if (email1 !== email2) {
-      setError('Podane adresy e-mail muszą być identyczne.');
-      return;
-    }
-    if (!acceptTerms) {
-      setError('Musisz zaakceptować regulamin i potwierdzić, że to Twój email.');
-      return;
-    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
 
-    setError(''); 
-    setLoading(true);
+        if (!email) {
+            setError('Proszę podać adres e-mail.');
+            return;
+        }
+        if (!agreedToTerms) {
+            setError('Musisz zaakceptować regulamin.');
+            return;
+        }
 
-    // 2. Wywołanie funkcji nadrzędnej z danymi zakupu
-    try {
-      await onPurchaseConfirm({ 
-        productId: product.id,
-        productTitle: product.title,
-        price: product.price,
-        customerEmail: email1,
-        promoCode: promoCode,
-        paymentMethod: paymentMethod, 
-      });
-    } catch (err) {
-      console.error("Błąd w PurchaseModal handleFormSubmit:", err);
-      setError(err.message || "Wystąpił nieznany błąd podczas finalizacji zakupu.");
-    } finally {
-      setLoading(false);
-    }
-  };
+        setIsLoading(true);
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" 
-          onClick={onClose} 
-        >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            onClick={(e) => e.stopPropagation()} 
-            className="bg-green-900/90 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-green-800/50 relative text-white" 
-          >
-            {/* Przycisk zamknięcia */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-green-400 transition-colors duration-200 focus:outline-none"
-              aria-label="Zamknij"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/create-checkout-session`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId: product.id, customerEmail: email }),
+            });
 
-            {/* Nagłówek Modala */}
-            <h3 className="text-2xl text-green-300 mb-4 font-semibold">Finalizacja zakupu: {product ? product.title : 'Produkt'}</h3>
-            <p className="text-gray-400 mb-6 text-sm">Podaj dane, aby otrzymać konto.</p>
-            
-            {/* Wyświetlanie Błędów */}
-            {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Wystąpił błąd podczas tworzenia sesji płatności.');
+            }
 
-            {/* Pola Formularza */}
-            <input
-              type="email"
-              placeholder="Twój email"
-              value={email1}
-              onChange={(e) => setEmail1(e.target.value)}
-              className="w-full p-3 mb-4 bg-green-800/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-400 placeholder-gray-500"
-              disabled={loading}
-            />
-            <input
-              type="email"
-              placeholder="Potwierdź email"
-              value={email2}
-              onChange={(e) => setEmail2(e.target.value)}
-              className="w-full p-3 mb-4 bg-green-800/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-400 placeholder-gray-500"
-              disabled={loading}
-            />
-            <input
-              type="text"
-              placeholder="Kod promocyjny (opcjonalnie)"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              className="w-full p-3 mb-4 bg-green-800/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-400 placeholder-gray-500"
-              disabled={loading}
-            />
-            <label className="flex items-center mb-6 cursor-pointer select-none">
-              <input 
-                type="checkbox" 
-                checked={acceptTerms}
-                onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="mr-2 accent-green-400 transform scale-125 focus:outline-none focus:ring-2 focus:ring-green-400"
-                disabled={loading}
-              />
-              <span className="text-gray-300 text-sm">Akceptuję <Link to="/regulamin" className="text-green-400 hover:underline">regulamin</Link> i potwierdzam, że podany email jest mój.</span>
-            </label>
+            const session = await response.json();
 
-            {/* Przyciski Akcji */}
-            <div className="flex justify-between gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onClose}
-                className="bg-gray-600 text-white py-2 px-6 rounded-full hover:bg-gray-700 transition-all duration-300 focus:outline-none"
-                disabled={loading}
-              >
-                Anuluj
-              </motion.button>
-              <div className="flex gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleFormSubmit('card')} 
-                  className="bg-green-500 text-white py-2 px-6 rounded-full hover:bg-green-600 transition-all duration-300 focus:outline-none"
-                  disabled={loading}
+            // Przekierowanie do Stripe Checkout
+            const stripe = window.Stripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
+            const { error: stripeError } = await stripe.redirectToCheckout({
+                sessionId: session.id,
+            });
+
+            if (stripeError) {
+                throw new Error(stripeError.message);
+            }
+
+            // Modal zostanie zamknięty przez przekierowanie na success/cancel page
+        } catch (err) {
+            console.error('Błąd płatności:', err);
+            setError(err.message || 'Nie udało się przetworzyć płatności. Spróbuj ponownie.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleTermsClick = (e) => {
+        e.preventDefault();
+        onClose(); // Zamknij modal, aby użytkownik mógł przejść do regulaminu
+        navigate('/regulamin'); // Przekieruj do strony regulaminu
+    };
+
+    return (
+        <div className="fixed inset-0 bg-dark-950 bg-opacity-80 flex justify-center items-center z-50 p-4 animate-fade-in">
+            <div className="bg-dark-800 border-2 border-accentGreen-700 rounded-xl shadow-2xl p-8 w-full max-w-md relative animate-pop-in">
+                {/* Przycisk zamknięcia */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-dark-300 hover:text-accentGreen-500 transition-colors duration-200"
+                    aria-label="Zamknij"
                 >
-                  {loading ? 'Ładowanie...' : `Zapłać ${product ? product.price : 0} PLN (Karta)`}
-                </motion.button>
-              </div>
+                    <XMarkIcon className="h-7 w-7" />
+                </button>
+
+                <h2 className="text-3xl font-bold text-dark-100 text-center mb-6">Zakup: {product.name}</h2>
+                <p className="text-xl text-accentGreen-400 text-center mb-8 font-semibold">Cena: {(product.price / 100).toFixed(2)} PLN</p>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                        <label htmlFor="email" className="block text-dark-200 text-sm font-medium mb-2">
+                            Twój adres e-mail (do wysłania danych konta):
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-md text-white placeholder-dark-400 focus:ring-2 focus:ring-accentGreen-500 focus:border-transparent outline-none transition-colors duration-200"
+                            placeholder="wpisz.email@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="agreeToTerms"
+                            className="h-5 w-5 text-accentGreen-500 bg-dark-700 border-dark-600 rounded focus:ring-2 focus:ring-accentGreen-500 accent-accentGreen-500 cursor-pointer"
+                            checked={agreedToTerms}
+                            onChange={(e) => setAgreedToTerms(e.target.checked)}
+                            required
+                        />
+                        <label htmlFor="agreeToTerms" className="ml-3 text-dark-200 text-sm">
+                            Akceptuję <a href="/regulamin" onClick={handleTermsClick} className="text-accentGreen-400 hover:underline font-semibold">regulamin</a>
+                        </label>
+                    </div>
+
+                    {error && (
+                        <p className="text-red-500 text-sm text-center mt-4 animate-fade-in">{error}</p>
+                    )}
+
+                    <button
+                        type="submit"
+                        className="w-full bg-accentGreen-500 hover:bg-accentGreen-600 text-white font-bold py-3 rounded-md transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-md hover:shadow-lg animate-pulse-glow-accent"
+                        disabled={isLoading || !agreedToTerms}
+                    >
+                        {isLoading ? (
+                            <svg className="animate-spin h-5 w-5 text-white mr-3" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        ) : 'Przejdź do Płatności'}
+                    </button>
+                </form>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+        </div>
+    );
 };
 
 export default PurchaseModal;

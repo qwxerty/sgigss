@@ -2,35 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Import fontów z Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap'); */
+
+/* Globalne style dla całej strony */
+@layer base {
+  body {
+    @apply bg-dark-950 text-dark-100 font-sans; /* Bardzo ciemne tło, jasny tekst */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Dostosowanie paska przewijania dla nowoczesnego wyglądu */
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-/* Custom scrollbar for OpinionCard */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+::-webkit-scrollbar-track {
+  background: #080808; /* dark-950 */
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(30, 80, 50, 0.3);
-  border-radius: 4px;
+::-webkit-scrollbar-thumb {
+  background: #00D140; /* accentGreen-500 */
+  border-radius: 5px;
+  border: 2px solid #00581B; /* accentGreen-800 */
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(52, 211, 153, 0.7);
-  border-radius: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(52, 211, 153, 1);
+::-webkit-scrollbar-thumb:hover {
+  background: #00A832; /* accentGreen-600 */
 }

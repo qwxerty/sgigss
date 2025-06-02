@@ -1,39 +1,31 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
-import { motion } from 'framer-motion';
+import Footer from '../components/Footer';
 
-const CancelPage = ({ navigateTo }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-green-950 text-white font-sans flex flex-col items-center justify-center text-center"
-    >
-      <Navbar navigateTo={navigateTo} />
-      <section className="py-20 px-4 max-w-2xl mx-auto">
-        <h2 className="text-5xl md:text-6xl text-red-600 mb-8 font-extrabold tracking-tight">
-          Płatność anulowana
-        </h2>
-        <p className="text-lg md:text-xl text-gray-300 mb-8">
-          Twoja płatność została anulowana lub nie powiodła się.
-        </p>
-        <p className="text-gray-400 text-sm">
-          Jeśli masz pytania lub problem nadal występuje, skontaktuj się z nami.
-        </p>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => navigateTo('home')}
-          className="mt-10 bg-green-600 text-white py-3 px-8 rounded-full hover:bg-green-700 transition-all duration-300 shadow-lg"
-        >
-          Wróć do strony głównej
-        </motion.button>
-      </section>
-      {/* Footer można dodać tutaj, jeśli jest komponentem */}
-    </motion.div>
-  );
+const CancelPage = () => {
+    return (
+        <div className="min-h-screen bg-dark-950 text-dark-100 flex flex-col font-sans">
+            <Navbar />
+            <main className="flex-grow container mx-auto px-4 py-16 flex flex-col items-center justify-center">
+                <div className="bg-dark-800 border-2 border-red-500 rounded-lg shadow-xl p-8 max-w-md text-center animate-fade-in">
+                    <svg className="mx-auto h-24 w-24 text-red-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h1 className="text-4xl font-extrabold text-dark-100 mb-4">Płatność Anulowana</h1>
+                    <p className="text-lg text-dark-200 mb-6">
+                        Twoja płatność została anulowana. Możesz spróbować ponownie lub skontaktować się z nami w przypadku problemów.
+                    </p>
+                    <a
+                        href="/"
+                        className="mt-8 inline-block bg-accentGreen-500 hover:bg-accentGreen-600 text-white font-bold py-3 px-8 rounded-md transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+                    >
+                        Wróć do strony głównej
+                    </a>
+                </div>
+            </main>
+            <Footer />
+        </div>
+    );
 };
 
 export default CancelPage;

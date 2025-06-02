@@ -1,26 +1,35 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
-const CollaboratorList = () => {
-  const collaborators = [
-    { name: 'PixelMaster', code: 'PIXEL' },
-    { name: 'BlockKing', code: 'BLOCK' },
-    { name: 'CraftHero', code: 'CRAFT' },
-  ];
+const CollaboratorList = ({ collaborators }) => {
+    const itemVariants = {
+        hidden: { opacity: 0, scale: 0.8 },
+        visible: { opacity: 1, scale: 1 }
+    };
 
-  return (
-    <section className="py-16 px-4 bg-gray-900">
-      <h2 className="text-4xl text-center text-neon-blue-500 mb-10 font-bold">NASI WSPÓŁPRACOWNICY</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-        {collaborators.map((collaborator, index) => (
-          <div key={index} className="text-center p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
-            <div className="w-16 h-16 mx-auto bg-neon-green-400 rounded-full mb-2 animate-pulse"></div>
-            <h4 className="text-lg font-medium text-neon-blue-400">{collaborator.name}</h4>
-            <p className="text-sm text-gray-500">Kod: {collaborator.code}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+    return (
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            transition={{ staggerChildren: 0.1 }}
+            className="flex flex-wrap justify-center items-center gap-8 py-8 bg-dark-900 rounded-lg shadow-xl border border-dark-700"
+        >
+            {collaborators.map((collab, index) => (
+                <motion.a
+                    key={collab.id}
+                    href={collab.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variants={itemVariants}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex flex-col items-center p-4 rounded-lg bg-dark-800 hover:bg-dark-700 transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg border border-dark-700"
+                >
+                    <img src={collab.logo} alt={collab.name} className="h-16 object-contain mb-2 filter grayscale hover:grayscale-0 transition-all duration-300" />
+                    <span className="text-dark-100 text-sm font-semibold text-center">{collab.name}</span>
+                </motion.a>
+            ))}
+        </motion.div>
+    );
 };
 
 export default CollaboratorList;
