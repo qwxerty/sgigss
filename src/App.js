@@ -1,25 +1,31 @@
+// frontend/src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import Home from './pages/Home';
-import Opinie from './pages/Opinie';
-import Regulamin from './pages/Regulamin';
-import Kontakt from './pages/Kontakt';
-import FAQ from './pages/Faq';
+import { Routes, Route, useLocation } from 'react-router-dom'; 
+import HomePage from './pages/HomePage';
+import SuccessPage from './pages/SuccessPage';
+import CancelPage from './pages/CancelPage';
+import TermsPage from './pages/TermsPage';
+import ContactPage from './pages/ContactPage';
+import FaqPage from './pages/FaqPage';
+import OpinionsPage from './pages/OpinionsPage';
 
 function App() {
+  const location = useLocation(); 
+
   return (
-    <Router>
-      <AnimatePresence mode="wait">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/opinie" element={<Opinie />} />
-          <Route path="/regulamin" element={<Regulamin />} />
-          <Route path="/kontakt" element={<Kontakt />} />
-          <Route path="/faq" element={<FAQ />} />
-        </Routes>
-      </AnimatePresence>
-    </Router>
+    <div className="App">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/success" element={<SuccessPage />} /> 
+        <Route path="/cancel" element={<CancelPage />} />
+        <Route path="/regulamin" element={<TermsPage />} /> 
+        <Route path="/kontakt" element={<ContactPage />} />
+        <Route path="/faq" element={<FaqPage />} />
+        <Route path="/opinie" element={<OpinionsPage />} />
+        {/* Obsługa 404 - przekierowanie na stronę główną */}
+        <Route path="*" element={<HomePage />} /> 
+      </Routes>
+    </div>
   );
 }
 

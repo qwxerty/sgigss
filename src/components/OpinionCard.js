@@ -1,4 +1,4 @@
-// src/components/OpinionCard.js
+// frontend/src/components/OpinionCard.js
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
@@ -17,12 +17,9 @@ const OpinionCard = ({ id, avatar, username, content, rating, date, delay }) => 
   // Sprawdź, czy tekst wykracza poza wysokość
   useEffect(() => {
     if (contentRef.current) {
-      // Skrócona wysokość dla widoku
-      const currentHeight = contentRef.current.scrollHeight;
       const collapsedHeight = MAX_LINES_COLLAPSED * LINE_HEIGHT_PX;
-      setIsOverflowing(currentHeight > collapsedHeight);
+      setIsOverflowing(contentRef.current.scrollHeight > collapsedHeight);
     }
-    // Resetuj stan rozwinięcia przy zmianie treści
     setIsExpanded(false); 
   }, [content]);
 
@@ -47,10 +44,9 @@ const OpinionCard = ({ id, avatar, username, content, rating, date, delay }) => 
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.8, delay: delay }}
-      // Zmieniono wysokość, aby lepiej radzić sobie z różnymi treściami
+      transition={{ duration: 0.8, delay: delay }} 
       className={`relative bg-green-900/60 backdrop-blur-lg p-7 rounded-2xl shadow-xl border border-green-800/40 group flex flex-col transition-all duration-300 ease-in-out
-        ${isExpanded ? 'min-h-[250px]' : 'min-h-[250px] max-h-[400px] sm:max-h-[350px] md:max-h-[300px] overflow-hidden'}
+        ${isExpanded ? 'min-h-[250px] sm:min-h-[280px]' : 'min-h-[250px] sm:min-h-[280px] max-h-[400px] sm:max-h-[350px] md:max-h-[300px] overflow-hidden'}
         hover:shadow-2xl hover:border-green-700
       `}
     >
@@ -70,24 +66,22 @@ const OpinionCard = ({ id, avatar, username, content, rating, date, delay }) => 
               e.target.src = 'https://placehold.co/128x128/34D399/10B981?text=?'; 
             }}
           />
-          <div className="flex-grow"> {/* Flex-grow dla nazwy i daty, aby gwiazdki były po prawej */}
+          <div className="flex-grow"> 
             <h4 className="text-xl text-green-300 font-bold leading-tight">{username}</h4>
             <p className="text-gray-400 text-sm mt-1">{date}</p>
           </div>
           {/* Wyświetlanie gwiazdek */}
           {rating && (
-            <div className="flex text-lg space-x-0.5 ml-auto"> {/* ml-auto aby gwiazdki były po prawej */}
+            <div className="flex text-lg space-x-0.5 ml-auto"> 
               {renderStars(rating)}
             </div>
           )}
         </div>
 
-        {/* Treść opinii - kluczowa zmiana: overflow-wrap i warunkowe ukrywanie */}
+        {/* Treść opinii - teraz dynamicznie rozwijana */}
         <p 
           ref={contentRef}
           className={`text-gray-300 text-base leading-relaxed break-words transition-all duration-300 ease-in-out ${!isExpanded && isOverflowing ? 'overflow-hidden' : ''}`}
-          // Zamiast dynamicznego style.maxHeight, pozwalamy Tailwind'owi zarządzać overflow-hidden, 
-          // a efekt "fade out" będzie symulowany gradientem
           style={{ 
              maxHeight: !isExpanded && isOverflowing ? `${MAX_LINES_COLLAPSED * LINE_HEIGHT_PX}px` : 'none'
           }}
@@ -101,7 +95,7 @@ const OpinionCard = ({ id, avatar, username, content, rating, date, delay }) => 
         )}
 
         {/* Przycisk "Rozwiń opinię" - estetyczny i dynamiczny */}
-        {isOverflowing && (
+        {isOverflowing && ( 
           <motion.button
             onClick={handleToggleExpand}
             className="mt-4 px-4 py-2 bg-green-700 text-white rounded-full text-sm font-semibold hover:bg-green-600 transition-colors duration-300 self-center z-30 shadow-md"

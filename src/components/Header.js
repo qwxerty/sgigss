@@ -4,16 +4,14 @@ import { motion } from 'framer-motion';
 const Header = () => {
   return (
     <header className="relative h-[90vh] bg-gradient-to-b from-green-900 to-green-950 text-center flex items-center justify-center overflow-hidden">
-      {/* Zmiany w linii poniżej: usunięto bg-cover, dodano niestandardowy rozmiar tła i pozycję */}
-      {/* WAŻNE: Dodaj styl dla `bg-custom-size` w Twoim pliku CSS (np. index.css lub global.css) */}
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1619204715997-1367fe5812f1?q=80&w=1920&auto=format&fit=crop')] bg-custom-size bg-no-repeat bg-center opacity-15 animate-bg-move"></div>
+      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1619204715997-1367fe5812f1?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center opacity-15 animate-bg-move"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-green-950/80"></div>
-      <div className="relative z-10">
+      <div className="relative z-10 p-4"> {/* Dodano padding dla responsywności */}
         <motion.h1
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: 'easeOut' }}
-          className="text-5xl md:text-8xl font-extrabold text-white mb-4 tracking-tight"
+          className="text-5xl md:text-8xl font-extrabold text-white mb-4 tracking-tight leading-tight" /* Dodano leading-tight */
         >
           <span className="text-green-400">Mine</span><span className="text-green-300">Craft</span> Elite
         </motion.h1>
@@ -31,12 +29,16 @@ const Header = () => {
           transition={{ duration: 1.2, delay: 0.6, ease: 'easeOut' }}
           className="mt-8"
         >
-          <a href="#offers" className="bg-green-600 text-white py-3 px-8 rounded-full hover:bg-green-700 transition-all duration-300 shadow-lg">
+          <button 
+            onClick={() => document.getElementById('offers').scrollIntoView({ behavior: 'smooth' })}
+            className="bg-green-600 text-white py-3 px-8 rounded-full hover:bg-green-700 transition-all duration-300 shadow-lg focus:outline-none"
+          >
             Zobacz ofertę
-          </a>
+          </button>
         </motion.div>
       </div>
     </header>
   );
 };
+
 export default Header;

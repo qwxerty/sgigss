@@ -1,21 +1,21 @@
-// src/components/PurchaseModal.js
+// frontend/src/components/PurchaseModal.js
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import validator from 'validator'; // Do walidacji emaila - npm install validator
-//import { loadStripe } from '@stripe/stripe-js'; // Na razie zakomentowane, dla testów bez backendu
+import { Link } from 'react-router-dom'; // <--- Zmieniono z powrotem na Link
+import validator from 'validator'; 
+import { loadStripe } from '@stripe/stripe-js';
 
-// const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_YOUR_KEY');
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const PurchaseModal = ({ isOpen, onClose, product, onPurchaseConfirm }) => {
   const [email1, setEmail1] = useState('');
   const [email2, setEmail2] = useState('');
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState(''); 
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (!isOpen) return null; // Modal nie renderuje się, jeśli isOpen jest false
+  if (!isOpen) return null;
 
   const handleFormSubmit = async (paymentMethod) => {
     // 1. Walidacja danych
@@ -32,20 +32,19 @@ const PurchaseModal = ({ isOpen, onClose, product, onPurchaseConfirm }) => {
       return;
     }
 
-    setError(''); // Wyczyść błędy
+    setError(''); 
     setLoading(true);
 
-    // 2. Wywołanie funkcji nadrzędnej z danymi
+    // 2. Wywołanie funkcji nadrzędnej z danymi zakupu
     try {
-      await onPurchaseConfirm({ // onPurchaseConfirm będzie wywoływane w Home.js lub gdzie indziej
+      await onPurchaseConfirm({ 
         productId: product.id,
         productTitle: product.title,
         price: product.price,
         customerEmail: email1,
         promoCode: promoCode,
-        paymentMethod: paymentMethod,
+        paymentMethod: paymentMethod, 
       });
-      // Po sukcesie, modal zostanie zamknięty przez funkcję nadrzędną (onClose)
     } catch (err) {
       console.error("Błąd w PurchaseModal handleFormSubmit:", err);
       setError(err.message || "Wystąpił nieznany błąd podczas finalizacji zakupu.");
@@ -56,21 +55,21 @@ const PurchaseModal = ({ isOpen, onClose, product, onPurchaseConfirm }) => {
 
   return (
     <AnimatePresence>
-      {isOpen && ( // Używamy isOpen w AnimatePresence, aby animacje działały
+      {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" // Dodano p-4 dla responsywności na małych ekranach
-          onClick={onClose} // Zamknij modal po kliknięciu na tło
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" 
+          onClick={onClose} 
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            onClick={(e) => e.stopPropagation()} // Zapobiegaj zamykaniu po kliknięciu w modal
-            className="bg-green-900/90 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-green-800/50 relative text-white" // Dodano text-white
+            onClick={(e) => e.stopPropagation()} 
+            className="bg-green-900/90 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-green-800/50 relative text-white" 
           >
             {/* Przycisk zamknięcia */}
             <button
@@ -139,7 +138,7 @@ const PurchaseModal = ({ isOpen, onClose, product, onPurchaseConfirm }) => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => handleFormSubmit('card')} // Metoda płatności 'card'
+                  onClick={() => handleFormSubmit('card')} 
                   className="bg-green-500 text-white py-2 px-6 rounded-full hover:bg-green-600 transition-all duration-300 focus:outline-none"
                   disabled={loading}
                 >
